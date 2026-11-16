@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Exosphere — Procedural Planet Studio</title>
+  <meta name="description" content="Discover, shape and share procedural planets rendered live in a single GPU shader.">
+  <meta name="theme-color" content="#05060a">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <canvas id="sky" aria-label="Live render of the current planet. Drag to turn it, scroll to zoom."></canvas>
+
+  <header class="topbar" data-ui>
+    <a class="brand" href="./" aria-label="Exosphere">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="13" ry="4.2" fill="none" stroke="currentColor" stroke-width="1.4" transform="rotate(-18 16 16)"/><circle cx="16" cy="16" r="6.5" fill="currentColor"/></svg>
+      <span>Exosphere</span>
+    </a>
+    <p class="topbar-note">Procedural planet studio</p>
+    <div class="topbar-actions">
+      <button id="about-open" class="ghost icon-only" type="button" aria-label="About Exosphere">?</button>
+      <button id="share" class="ghost" type="button">Share</button>
+      <button id="export-png" class="solid" type="button">Export PNG</button>
+    </div>
+  </header>
+
+  <section class="survey" data-ui aria-live="polite">
+    <p class="kicker"><span id="catalog">EX-000000</span><span class="rule"></span><span id="klass">Terrestrial world</span></p>
+    <h1 id="world-name">Tellus</h1>
+    <dl class="stats">
+      <div><dt>Radius</dt><dd id="stat-radius">—</dd></div>
+      <div><dt>Day</dt><dd id="stat-day">—</dd></div>
+      <div><dt>Surface</dt><dd id="stat-temperature">—</dd></div>
+      <div><dt>Moons</dt><dd id="stat-moons">—</dd></div>
+    </dl>
+    <p class="hint">Drag to turn · scroll to zoom · survey figures are generated from the seed</p>
+  </section>
+
+  <aside id="panel" class="panel" data-ui data-open="true" aria-label="Planet controls">
+    <div class="panel-head">
+      <div>
+        <p class="kicker">Atlas</p>
+        <h2>Shape a world.</h2>
+      </div>
+      <button id="panel-close" class="ghost icon-only panel-close" type="button" aria-label="Close controls">×</button>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span>Catalogued worlds</span><span>01—06</span></div>
+      <div id="preset-grid" class="preset-grid"></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span>Body</span>
+        <span class="segmented" role="group" aria-label="Planet type">
+          <button id="type-rock" type="button" data-type="rock" aria-pressed="true">Rocky</button>
+          <button id="type-gas" type="button" data-type="gas" aria-pressed="false">Gas</button>
+        </span>
+      </div>
+      <div id="slider-list" class="slider-list"></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span>Palette</span><span>sRGB</span></div>
+      <div class="swatches">
+        <label><input id="color-ocean" type="color" aria-label="Ocean or primary band colour"><span id="label-ocean">Ocean</span></label>
+        <label><input id="color-low" type="color" aria-label="Lowland or secondary band colour"><span id="label-low">Lowland</span></label>
+        <label><input id="color-high" type="color" aria-label="Highland or accent band colour"><span id="label-high">Highland</span></label>
+        <label><input id="color-air" type="color" aria-label="Atmosphere colour"><span>Air</span></label>
+      </div>
+    </div>
+
+    <div class="group seed-group">
+      <div class="group-title"><span>Seed</span><span id="fps">— fps</span></div>
+      <form id="seed-form" class="seed-form">
+        <input id="seed" type="text" maxlength="32" spellcheck="false" autocomplete="off" aria-label="World seed">
+        <button class="ghost" type="submit">Load</button>
+      </form>
+    </div>
+
+    <footer id="build-credit" class="credit">
+      <span>Made by</span>
+      <strong>Claude Fable 5.2</strong>
+      <span class="credit-note">An AI-built experiment</span>
+    </footer>
+  </aside>
+
+  <nav class="dock" data-ui aria-label="Playback">
+    <button id="play-toggle" class="ghost icon-only" type="button" aria-label="Pause rotation">❙❙</button>
+    <button id="discover" class="solid discover" type="button">Discover a new world</button>
+    <button id="reset-view" class="ghost" type="button">Reset view</button>
+    <button id="panel-toggle" class="ghost panel-toggle" type="button" aria-expanded="false" aria-controls="panel">Tune</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" data-visible="false"></div>
+
+  <dialog id="about" class="about">
+    <p class="kicker">About</p>
+    <h2>Every world here is one equation.</h2>
+    <p>Exosphere draws each planet with a single fragment shader. Continents, oceans, cloud decks, ring shadows and the glow of the atmosphere are all computed per pixel, every frame, from a seed and a handful of numbers. Nothing is a texture or a model.</p>
+    <p>Pick a catalogued world, press <kbd>N</kbd> to discover a new one, tune it, then share the link. The same link always rebuilds the same planet.</p>
+    <ul class="keys">
+      <li><kbd>Space</kbd> pause</li><li><kbd>N</kbd> new world</li><li><kbd>R</kbd> reset view</li>
+      <li><kbd>H</kbd> hide interface</li><li><kbd>1</kbd>–<kbd>6</kbd> catalogue</li><li><kbd>?</kbd> this note</li>
+    </ul>
+    <p class="about-credit">Designed, written and tested by Claude Fable 5.2 as an experiment.</p>
+    <button id="about-close" class="solid" type="button">Back to the sky</button>
+  </dialog>
+
+  <div id="unsupported" class="unsupported" hidden>
+    <h2>This sky needs WebGL2.</h2>
+    <p id="unsupported-message"></p>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
